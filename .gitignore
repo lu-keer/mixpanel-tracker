@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.turbo/
+coverage/
+*.log
+.DS_Store
+.yarn/install-state.gz
+examples/**/.nuxt/
+examples/**/.output/
+examples/**/.env

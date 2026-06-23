@@ -1,0 +1,113 @@
+import { addPluginTemplate, defineNuxtModule } from '@nuxt/kit'
+import type { EventProperties, MixpanelTracker, MixpanelTrackerOptions } from '../core/types'
+import { createTracker } from '../core/tracker'
+
+export interface NuxtMixpanelTrackerOptions extends MixpanelTrackerOptions {
+  trackPageView?: boolean
+  pageViewEventName?: string
+}
+
+export interface NuxtMixpanelTrackerModuleOptions {
+  token?: string
+  enabled?: boolean
+  debug?: boolean
+  apiHost?: string
+  persistence?: MixpanelTrackerOptions['persistence']
+  commonProperties?: EventProperties
+  trackPageView?: boolean
+  pageViewEventName?: string
+}
+
+declare module 'nuxt/app' {
+  interface NuxtApp {
+    $mixpanel: MixpanelTracker
+  }
+}
+
+declare module 'nuxt/schema' {
+  interface NuxtConfig {
+    mixpanelTracker?: NuxtMixpanelTrackerModuleOptions
+  }
+
+  interface NuxtOptions {
+    mixpanelTracker?: NuxtMixpanelTrackerModuleOptions
+  }
+}
+function removeUndefinedOptions(
+  options: NuxtMixpanelTrackerModuleOptions,
+): NuxtMixpanelTrackerModuleOptions {
+  return Object.fromEntries(
+    Object.entries(options).filter(([, value]) => value !== undefined),
+  ) as NuxtMixpanelTrackerModuleOptions
+}
+
+function createRuntimePluginContents(): string {
+  return `import { defineNuxtPlugin, useRoute, useRuntimeConfig } from '#app'
+import { createTracker } from '@mixchunk/mixpanel-tracker'
+import { setupVueRouterTracking } from '@mixchunk/mixpanel-tracker/vue'
+
+export default defineNuxtPlugin((nuxtApp) => {
+  const runtimeConfig = useRuntimeConfig()
+  const moduleOptions = runtimeConfig.public.mixpanelTracker || {}
+  const route = useRoute()
+
+  const tracker = createTracker({
+    token: moduleOptions.token || '',
+    enabled: moduleOptions.enabled,
+    debug: moduleOptions.debug,
+    apiHost: moduleOptions.apiHost,
+    persistence: moduleOptions.persistence,
+    commonProperties: moduleOptions.commonProperties,
+    getCommonProperties: () => ({
+      route_path: route.fullPath,
+      route_name: String(route.name || ''),
+    }),
+  })
+
+  nuxtApp.provide('mixpanel', tracker)
+
+  if (moduleOptions.trackPageView) {
+    setupVueRouterTracking(nuxtApp.$router, tracker, {
+      eventName: moduleOptions.pageViewEventName || 'Page Viewed',
+    })
+  }
+})
+`
+}
+
+export function createNuxtMixpanelTracker(
+  options: NuxtMixpanelTrackerOptions,
+): MixpanelTracker {
+  return createTracker(options)
+}
+
+export default defineNuxtModule<NuxtMixpanelTrackerModuleOptions>({
+  meta: {
+    name: '@mixchunk/mixpanel-tracker',
+    configKey: 'mixpanelTracker',
+    compatibility: {
+      nuxt: '^3.0.0 || ^4.0.0',
+    },
+  },
+  defaults: {
+    enabled: true,
+    trackPageView: false,
+    pageViewEventName: 'Page Viewed',
+  },
+  setup(options, nuxt) {
+    const runtimeConfig = nuxt.options.runtimeConfig
+    const publicConfig = runtimeConfig.public as Record<string, unknown>
+    const existingOptions = (publicConfig.mixpanelTracker || {}) as NuxtMixpanelTrackerModuleOptions
+
+    publicConfig.mixpanelTracker = {
+      ...existingOptions,
+      ...removeUndefinedOptions(options),
+    }
+
+    addPluginTemplate({
+      filename: 'mixpanel-tracker.client.mjs',
+      mode: 'client',
+      getContents: createRuntimePluginContents,
+    })
+  },
+})

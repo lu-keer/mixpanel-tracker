@@ -1,0 +1,81 @@
+{
+  "name": "@mixchunk/mixpanel-tracker",
+  "version": "0.1.0",
+  "type": "module",
+  "packageManager": "yarn@4.17.0",
+  "description": "A typed Mixpanel tracking SDK for browser, Vue, and Nuxt projects.",
+  "license": "MIT",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./vue": {
+      "types": "./dist/vue.d.ts",
+      "import": "./dist/vue.js"
+    },
+    "./nuxt": {
+      "types": "./dist/nuxt.d.ts",
+      "import": "./dist/nuxt.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "workspaces": [
+    ".",
+    "examples/*"
+  ],
+  "scripts": {
+    "dev": "tsup --watch",
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "lint": "eslint .",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "yarn build && changeset publish",
+    "example:vue:dev": "yarn workspace @mixchunk/mixpanel-tracker-example-vue dev",
+    "example:nuxt:dev": "yarn workspace @mixchunk/mixpanel-tracker-example-nuxt dev",
+    "prepublishOnly": "yarn typecheck && yarn test && yarn build"
+  },
+  "peerDependencies": {
+    "mixpanel-browser": "^2.80.0",
+    "nuxt": "^3.0.0 || ^4.0.0",
+    "vue": "*",
+    "vue-router": "^4.0.0"
+  },
+  "peerDependenciesMeta": {
+    "nuxt": {
+      "optional": true
+    },
+    "vue": {
+      "optional": true
+    },
+    "vue-router": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "@nuxt/kit": "^3.0.0 || ^4.0.0"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.31.0",
+    "@types/node": "^26.0.0",
+    "eslint": "^10.5.0",
+    "jsdom": "^29.1.1",
+    "mixpanel-browser": "^2.80.0",
+    "nuxt": "^4.0.0",
+    "tsup": "^8.5.1",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.61.1",
+    "vitest": "^4.1.9",
+    "vue": "^3.5.38",
+    "vue-router": "^4.0.0"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "name": "@mixchunk/mixpanel-tracker-example-vue",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "yarn@4.17.0",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@mixchunk/mixpanel-tracker": "workspace:*",
+    "mixpanel-browser": "^2.80.0",
+    "vue": "^3.5.0",
+    "vue-router": "^4.0.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.0",
+    "typescript": "^6.0.0",
+    "vite": "^7.0.0"
+  }
+}
