@@ -1482,7 +1482,6 @@ __metadata:
     vue: "npm:^3.5.38"
     vue-router: "npm:^4.0.0"
   peerDependencies:
-    mixpanel-browser: ^2.80.0
     nuxt: ^3.0.0 || ^4.0.0
     vue: "*"
     vue-router: ^4.0.0
