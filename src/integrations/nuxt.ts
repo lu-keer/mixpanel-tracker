@@ -30,6 +30,12 @@ declare module '#app' {
   }
 }
 
+declare module '#app/nuxt' {
+  interface NuxtApp {
+    $mixpanel: MixpanelTracker
+  }
+}
+
 declare module 'vue' {
   interface ComponentCustomProperties {
     $mixpanel: MixpanelTracker
@@ -76,12 +82,16 @@ export default defineNuxtPlugin((nuxtApp) => {
     }),
   })
 
-  nuxtApp.provide('mixpanel', tracker)
-
   if (moduleOptions.trackPageView) {
     setupVueRouterTracking(nuxtApp.$router, tracker, {
       eventName: moduleOptions.pageViewEventName || 'Page Viewed',
     })
+  }
+
+  return {
+    provide: {
+      mixpanel: tracker,
+    },
   }
 })
 `
@@ -92,6 +102,12 @@ function createRuntimeTypesContents(): string {
 import type { NuxtMixpanelTrackerModuleOptions } from '@mixchunk/mixpanel-tracker/nuxt'
 
 declare module '#app' {
+  interface NuxtApp {
+    $mixpanel: MixpanelTracker
+  }
+}
+
+declare module '#app/nuxt' {
   interface NuxtApp {
     $mixpanel: MixpanelTracker
   }
@@ -135,7 +151,7 @@ export function createNuxtMixpanelTracker(
 
 export default defineNuxtModule<NuxtMixpanelTrackerModuleOptions>({
   meta: {
-    name: '@mixchunk/mixpanel-tracker',
+    name: '@mixchunk/mixpanel-tracker/nuxt',
     configKey: 'mixpanelTracker',
     compatibility: {
       nuxt: '^3.0.0 || ^4.0.0',
@@ -157,7 +173,7 @@ export default defineNuxtModule<NuxtMixpanelTrackerModuleOptions>({
     }
 
     addPluginTemplate({
-      filename: 'mixpanel-tracker.client.mjs',
+      filename: 'mixpanel-tracker.client.ts',
       mode: 'client',
       getContents: createRuntimePluginContents,
     })

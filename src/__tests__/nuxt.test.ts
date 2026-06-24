@@ -58,7 +58,7 @@ describe('Nuxt integration', () => {
     moduleDefinition.setup({}, nuxt)
 
     expect(addPluginTemplate).toHaveBeenCalledWith({
-      filename: 'mixpanel-tracker.client.mjs',
+      filename: 'mixpanel-tracker.client.ts',
       mode: 'client',
       getContents: expect.any(Function),
     })
@@ -149,7 +149,9 @@ describe('Nuxt integration', () => {
     expect(contents).toContain("import { defineNuxtPlugin, useRoute, useRuntimeConfig } from '#app'")
     expect(contents).toContain("import { createTracker } from '@mixchunk/mixpanel-tracker'")
     expect(contents).toContain("import { setupVueRouterTracking } from '@mixchunk/mixpanel-tracker/vue'")
-    expect(contents).toContain("nuxtApp.provide('mixpanel', tracker)")
+    expect(contents).toContain('return {')
+    expect(contents).toContain('provide: {')
+    expect(contents).toContain('mixpanel: tracker')
     expect(contents).toContain('setupVueRouterTracking(nuxtApp.$router, tracker')
   })
 
@@ -177,6 +179,7 @@ describe('Nuxt integration', () => {
       "import type { NuxtMixpanelTrackerModuleOptions } from '@mixchunk/mixpanel-tracker/nuxt'",
     )
     expect(contents).toContain("declare module '#app'")
+    expect(contents).toContain("declare module '#app/nuxt'")
     expect(contents).toContain("declare module 'nuxt/app'")
     expect(contents).toContain("declare module 'nuxt/schema'")
     expect(contents).toContain("declare module 'vue'")
