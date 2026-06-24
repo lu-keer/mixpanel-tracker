@@ -1,5 +1,11 @@
 # @mixchunk/mixpanel-tracker
 
+## 0.1.3
+
+### Patch Changes
+
+- fd22e5c: Fix Nuxt injected $mixpanel type inference for useNuxtApp.
+
 ## 0.1.2
 
 ### Patch Changes
