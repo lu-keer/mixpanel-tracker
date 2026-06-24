@@ -255,13 +255,7 @@ yarn release
 
 发布需要在仓库中配置 `NPM_TOKEN` secret。当前正式包名为 `@mixchunk/mixpanel-tracker`，发布账号需要拥有 `@mixchunk` scope 的 npm 发布权限。
 
-Changesets 还需要创建 version pull request。仓库需要在 GitHub 的 `Settings -> Actions -> General -> Workflow permissions` 中开启 `Allow GitHub Actions to create and approve pull requests`。如果组织策略不允许开启该选项，可以创建一个具有 `contents: write` 和 `pull requests: write` 权限的 fine-grained personal access token，并保存为仓库 secret：
-
-```text
-CHANGESETS_TOKEN
-```
-
-release workflow 会优先使用 `CHANGESETS_TOKEN`，未配置时回退到默认的 `github.token`。
+Changesets 还需要创建 version pull request。当前 release workflow 使用 GitHub Actions 默认注入的 `github.token`。仓库需要在 GitHub 的 `Settings -> Actions -> General -> Workflow permissions` 中开启 `Allow GitHub Actions to create and approve pull requests`。
 
 ## 迁移说明
 
