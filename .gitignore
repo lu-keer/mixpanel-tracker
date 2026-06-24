@@ -8,3 +8,4 @@ coverage/
 examples/**/.nuxt/
 examples/**/.output/
 examples/**/.env
+docs/

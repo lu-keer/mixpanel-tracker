@@ -1,4 +1,4 @@
-import { addPluginTemplate } from '@nuxt/kit'
+import { addPluginTemplate, addTypeTemplate } from '@nuxt/kit'
 import mixpanel from 'mixpanel-browser'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import nuxtModule, { createNuxtMixpanelTracker } from '../integrations/nuxt'
@@ -7,6 +7,10 @@ vi.mock('@nuxt/kit', () => ({
   addPluginTemplate: vi.fn((plugin) => ({
     src: plugin.filename,
     ...plugin,
+  })),
+  addTypeTemplate: vi.fn((template) => ({
+    dst: template.filename,
+    ...template,
   })),
   defineNuxtModule: vi.fn((definition) => definition),
 }))
@@ -147,6 +151,32 @@ describe('Nuxt integration', () => {
     expect(contents).toContain("import { setupVueRouterTracking } from '@mixchunk/mixpanel-tracker/vue'")
     expect(contents).toContain("nuxtApp.provide('mixpanel', tracker)")
     expect(contents).toContain('setupVueRouterTracking(nuxtApp.$router, tracker')
+  })
+
+  it('generates Nuxt app and component types for the injected tracker', () => {
+    const moduleDefinition = nuxtModule as unknown as TestNuxtModuleDefinition
+    const nuxt = {
+      options: {
+        runtimeConfig: {
+          public: {},
+        },
+      },
+    }
+
+    moduleDefinition.setup({}, nuxt)
+
+    const template = vi.mocked(addTypeTemplate).mock.calls[0]?.[0]
+    const contents = typeof template === 'object' ? template.getContents?.({} as never) : ''
+
+    expect(addTypeTemplate).toHaveBeenCalledWith({
+      filename: 'types/mixpanel-tracker.d.ts',
+      getContents: expect.any(Function),
+    })
+    expect(contents).toContain("import type { MixpanelTracker } from '@mixchunk/mixpanel-tracker'")
+    expect(contents).toContain("declare module '#app'")
+    expect(contents).toContain("declare module 'nuxt/app'")
+    expect(contents).toContain("declare module 'vue'")
+    expect(contents).toContain('$mixpanel: MixpanelTracker')
   })
 
   it('keeps createNuxtMixpanelTracker as a manual helper', () => {

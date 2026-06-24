@@ -1,4 +1,4 @@
-import { addPluginTemplate, defineNuxtModule } from '@nuxt/kit'
+import { addPluginTemplate, addTypeTemplate, defineNuxtModule } from '@nuxt/kit'
 import type { EventProperties, MixpanelTracker, MixpanelTrackerOptions } from '../core/types'
 import { createTracker } from '../core/tracker'
 
@@ -20,6 +20,18 @@ export interface NuxtMixpanelTrackerModuleOptions {
 
 declare module 'nuxt/app' {
   interface NuxtApp {
+    $mixpanel: MixpanelTracker
+  }
+}
+
+declare module '#app' {
+  interface NuxtApp {
+    $mixpanel: MixpanelTracker
+  }
+}
+
+declare module 'vue' {
+  interface ComponentCustomProperties {
     $mixpanel: MixpanelTracker
   }
 }
@@ -75,6 +87,31 @@ export default defineNuxtPlugin((nuxtApp) => {
 `
 }
 
+function createRuntimeTypesContents(): string {
+  return `import type { MixpanelTracker } from '@mixchunk/mixpanel-tracker'
+
+declare module '#app' {
+  interface NuxtApp {
+    $mixpanel: MixpanelTracker
+  }
+}
+
+declare module 'nuxt/app' {
+  interface NuxtApp {
+    $mixpanel: MixpanelTracker
+  }
+}
+
+declare module 'vue' {
+  interface ComponentCustomProperties {
+    $mixpanel: MixpanelTracker
+  }
+}
+
+export {}
+`
+}
+
 export function createNuxtMixpanelTracker(
   options: NuxtMixpanelTrackerOptions,
 ): MixpanelTracker {
@@ -108,6 +145,11 @@ export default defineNuxtModule<NuxtMixpanelTrackerModuleOptions>({
       filename: 'mixpanel-tracker.client.mjs',
       mode: 'client',
       getContents: createRuntimePluginContents,
+    })
+
+    addTypeTemplate({
+      filename: 'types/mixpanel-tracker.d.ts',
+      getContents: createRuntimeTypesContents,
     })
   },
 })
