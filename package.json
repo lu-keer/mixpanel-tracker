@@ -1,6 +1,6 @@
 {
   "name": "@mixchunk/mixpanel-tracker",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "type": "module",
   "packageManager": "yarn@4.17.0",
   "description": "A typed Mixpanel tracking SDK for browser, Vue, and Nuxt projects.",
@@ -27,6 +27,10 @@
     "dist",
     "README.md"
   ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
   "workspaces": [
     ".",
     "examples/*"
