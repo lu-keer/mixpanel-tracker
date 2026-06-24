@@ -89,6 +89,7 @@ export default defineNuxtPlugin((nuxtApp) => {
 
 function createRuntimeTypesContents(): string {
   return `import type { MixpanelTracker } from '@mixchunk/mixpanel-tracker'
+import type { NuxtMixpanelTrackerModuleOptions } from '@mixchunk/mixpanel-tracker/nuxt'
 
 declare module '#app' {
   interface NuxtApp {
@@ -105,6 +106,20 @@ declare module 'nuxt/app' {
 declare module 'vue' {
   interface ComponentCustomProperties {
     $mixpanel: MixpanelTracker
+  }
+}
+
+declare module 'nuxt/schema' {
+  interface NuxtConfig {
+    mixpanelTracker?: NuxtMixpanelTrackerModuleOptions
+  }
+
+  interface NuxtOptions {
+    mixpanelTracker?: NuxtMixpanelTrackerModuleOptions
+  }
+
+  interface PublicRuntimeConfig {
+    mixpanelTracker?: NuxtMixpanelTrackerModuleOptions
   }
 }
 

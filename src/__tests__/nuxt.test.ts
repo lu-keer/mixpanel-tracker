@@ -173,9 +173,14 @@ describe('Nuxt integration', () => {
       getContents: expect.any(Function),
     })
     expect(contents).toContain("import type { MixpanelTracker } from '@mixchunk/mixpanel-tracker'")
+    expect(contents).toContain(
+      "import type { NuxtMixpanelTrackerModuleOptions } from '@mixchunk/mixpanel-tracker/nuxt'",
+    )
     expect(contents).toContain("declare module '#app'")
     expect(contents).toContain("declare module 'nuxt/app'")
+    expect(contents).toContain("declare module 'nuxt/schema'")
     expect(contents).toContain("declare module 'vue'")
+    expect(contents).toContain('mixpanelTracker?: NuxtMixpanelTrackerModuleOptions')
     expect(contents).toContain('$mixpanel: MixpanelTracker')
   })
 
