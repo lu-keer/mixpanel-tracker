@@ -1,6 +1,6 @@
 {
   "name": "@mixchunk/mixpanel-tracker",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "type": "module",
   "packageManager": "yarn@4.17.0",
   "description": "A typed Mixpanel tracking SDK for browser, Vue, and Nuxt projects.",

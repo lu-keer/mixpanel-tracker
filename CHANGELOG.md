@@ -1,5 +1,11 @@
 # @mixchunk/mixpanel-tracker
 
+## 0.1.4
+
+### Patch Changes
+
+- 7637c94: Refine Nuxt tracker typing and docs
+
 ## 0.1.3
 
 ### Patch Changes
