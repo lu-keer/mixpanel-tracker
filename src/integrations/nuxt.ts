@@ -18,30 +18,6 @@ export interface NuxtMixpanelTrackerModuleOptions {
   pageViewEventName?: string
 }
 
-declare module 'nuxt/app' {
-  interface NuxtApp {
-    $mixpanel: MixpanelTracker
-  }
-}
-
-declare module '#app' {
-  interface NuxtApp {
-    $mixpanel: MixpanelTracker
-  }
-}
-
-declare module '#app/nuxt' {
-  interface NuxtApp {
-    $mixpanel: MixpanelTracker
-  }
-}
-
-declare module 'vue' {
-  interface ComponentCustomProperties {
-    $mixpanel: MixpanelTracker
-  }
-}
-
 declare module 'nuxt/schema' {
   interface NuxtConfig {
     mixpanelTracker?: NuxtMixpanelTrackerModuleOptions
@@ -62,6 +38,7 @@ function removeUndefinedOptions(
 function createRuntimePluginContents(): string {
   return `import { defineNuxtPlugin, useRoute, useRuntimeConfig } from '#app'
 import { createTracker } from '@mixchunk/mixpanel-tracker'
+import type { MixpanelTracker } from '@mixchunk/mixpanel-tracker'
 import { setupVueRouterTracking } from '@mixchunk/mixpanel-tracker/vue'
 
 export default defineNuxtPlugin((nuxtApp) => {
@@ -69,7 +46,7 @@ export default defineNuxtPlugin((nuxtApp) => {
   const moduleOptions = runtimeConfig.public.mixpanelTracker || {}
   const route = useRoute()
 
-  const tracker = createTracker({
+  const tracker: MixpanelTracker = createTracker({
     token: moduleOptions.token || '',
     enabled: moduleOptions.enabled,
     debug: moduleOptions.debug,
@@ -98,32 +75,7 @@ export default defineNuxtPlugin((nuxtApp) => {
 }
 
 function createRuntimeTypesContents(): string {
-  return `import type { MixpanelTracker } from '@mixchunk/mixpanel-tracker'
-import type { NuxtMixpanelTrackerModuleOptions } from '@mixchunk/mixpanel-tracker/nuxt'
-
-declare module '#app' {
-  interface NuxtApp {
-    $mixpanel: MixpanelTracker
-  }
-}
-
-declare module '#app/nuxt' {
-  interface NuxtApp {
-    $mixpanel: MixpanelTracker
-  }
-}
-
-declare module 'nuxt/app' {
-  interface NuxtApp {
-    $mixpanel: MixpanelTracker
-  }
-}
-
-declare module 'vue' {
-  interface ComponentCustomProperties {
-    $mixpanel: MixpanelTracker
-  }
-}
+  return `import type { NuxtMixpanelTrackerModuleOptions } from '@mixchunk/mixpanel-tracker/nuxt'
 
 declare module 'nuxt/schema' {
   interface NuxtConfig {
@@ -175,6 +127,7 @@ export default defineNuxtModule<NuxtMixpanelTrackerModuleOptions>({
     addPluginTemplate({
       filename: 'mixpanel-tracker.client.ts',
       mode: 'client',
+      write: true,
       getContents: createRuntimePluginContents,
     })
 

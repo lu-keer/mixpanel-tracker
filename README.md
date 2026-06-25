@@ -156,7 +156,7 @@ export default defineNuxtConfig({
 })
 ```
 
-该模块会注册 client-only plugin，并向 Nuxt app context 注入 `$mixpanel`。
+该模块会注册 client-only typed plugin，并向 Nuxt app context 注入 `$mixpanel`。执行 `nuxi prepare` 后，编辑器应能为 `$mixpanel.track`、`identify`、`setUserProperties`、`reset` 等方法提供类型提示。
 
 ### 在 Nuxt 中上报事件
 
@@ -194,12 +194,13 @@ export default defineNuxtConfig({
 ```ts
 // plugins/mixpanel.client.ts
 import { createTracker } from '@mixchunk/mixpanel-tracker'
+import type { MixpanelTracker } from '@mixchunk/mixpanel-tracker'
 
 export default defineNuxtPlugin((nuxtApp) => {
   const config = useRuntimeConfig()
   const route = useRoute()
 
-  const tracker = createTracker({
+  const tracker: MixpanelTracker = createTracker({
     token: config.public.mixpanelToken,
     enabled: Boolean(config.public.mixpanelToken),
     getCommonProperties: () => ({
@@ -215,9 +216,15 @@ export default defineNuxtPlugin((nuxtApp) => {
     },
   })
 
-  nuxtApp.provide('mixpanel', tracker)
+  return {
+    provide: {
+      mixpanel: tracker,
+    },
+  }
 })
 ```
+
+为获得 Nuxt / Volar / ts-plugin 的稳定类型提示，手动插件也推荐使用 `return { provide }` 注入 `$mixpanel`，不要将 `nuxtApp.provide(...)` 作为主要注入方式。升级依赖后如果编辑器仍显示旧类型，执行 `nuxi prepare` 并重启 TypeScript Server。
 
 ## 普通浏览器项目接入
 
@@ -382,29 +389,33 @@ const tracker = createTracker({
 
 ### `createTracker(options)`
 
-| 字段 | 类型 | 说明 |
-| --- | --- | --- |
-| `token` | `string` | Mixpanel Project Token |
-| `enabled` | `boolean` | 是否启用埋点，默认为 `true` |
-| `debug` | `boolean` | 是否输出调试日志 |
-| `apiHost` | `string` | 自定义 Mixpanel API Host |
-| `persistence` | `'cookie' \| 'localStorage' \| 'none'` | Mixpanel 持久化方式 |
-| `commonProperties` | `Record<string, unknown>` | 静态公共属性 |
-| `getCommonProperties` | `() => Record<string, unknown>` | 动态公共属性 |
-| `beforeTrack` | `(eventName, properties) => false \| object \| void` | 上报前处理或过滤 |
-| `onError` | `(error) => void` | SDK 内部错误回调 |
+
+| 字段                    | 类型                                                 | 说明                     |
+| --------------------- | -------------------------------------------------- | ---------------------- |
+| `token`               | `string`                                           | Mixpanel Project Token |
+| `enabled`             | `boolean`                                          | 是否启用埋点，默认为 `true`      |
+| `debug`               | `boolean`                                          | 是否输出调试日志               |
+| `apiHost`             | `string`                                           | 自定义 Mixpanel API Host  |
+| `persistence`         | `'cookie' | 'localStorage' | 'none'`               | Mixpanel 持久化方式         |
+| `commonProperties`    | `Record<string, unknown>`                          | 静态公共属性                 |
+| `getCommonProperties` | `() => Record<string, unknown>`                    | 动态公共属性                 |
+| `beforeTrack`         | `(eventName, properties) => false | object | void` | 上报前处理或过滤               |
+| `onError`             | `(error) => void`                                  | SDK 内部错误回调             |
+
 
 ### Tracker 方法
 
-| 方法 | 说明 |
-| --- | --- |
-| `track(eventName, properties?)` | 上报事件 |
-| `identify(userId)` | 绑定 Mixpanel distinct id |
-| `setUserProperties(properties)` | 设置用户属性 |
-| `registerCommonProperties(properties)` | 注册运行时公共属性 |
-| `unregisterCommonProperty(name)` | 删除单个运行时公共属性 |
-| `reset()` | 重置 Mixpanel 状态并清空运行时公共属性 |
-| `getState()` | 获取 `enabled`、`initialized`、`browser` 状态 |
+
+| 方法                                     | 说明                                      |
+| -------------------------------------- | --------------------------------------- |
+| `track(eventName, properties?)`        | 上报事件                                    |
+| `identify(userId)`                     | 绑定 Mixpanel distinct id                 |
+| `setUserProperties(properties)`        | 设置用户属性                                  |
+| `registerCommonProperties(properties)` | 注册运行时公共属性                               |
+| `unregisterCommonProperty(name)`       | 删除单个运行时公共属性                             |
+| `reset()`                              | 重置 Mixpanel 状态并清空运行时公共属性                |
+| `getState()`                           | 获取 `enabled`、`initialized`、`browser` 状态 |
+
 
 ## 建议的业务侧组织方式
 

@@ -60,6 +60,7 @@ describe('Nuxt integration', () => {
     expect(addPluginTemplate).toHaveBeenCalledWith({
       filename: 'mixpanel-tracker.client.ts',
       mode: 'client',
+      write: true,
       getContents: expect.any(Function),
     })
   })
@@ -148,14 +149,16 @@ describe('Nuxt integration', () => {
 
     expect(contents).toContain("import { defineNuxtPlugin, useRoute, useRuntimeConfig } from '#app'")
     expect(contents).toContain("import { createTracker } from '@mixchunk/mixpanel-tracker'")
+    expect(contents).toContain("import type { MixpanelTracker } from '@mixchunk/mixpanel-tracker'")
     expect(contents).toContain("import { setupVueRouterTracking } from '@mixchunk/mixpanel-tracker/vue'")
+    expect(contents).toContain('const tracker: MixpanelTracker = createTracker({')
     expect(contents).toContain('return {')
     expect(contents).toContain('provide: {')
     expect(contents).toContain('mixpanel: tracker')
     expect(contents).toContain('setupVueRouterTracking(nuxtApp.$router, tracker')
   })
 
-  it('generates Nuxt app and component types for the injected tracker', () => {
+  it('generates Nuxt config and runtime config types', () => {
     const moduleDefinition = nuxtModule as unknown as TestNuxtModuleDefinition
     const nuxt = {
       options: {
@@ -174,17 +177,15 @@ describe('Nuxt integration', () => {
       filename: 'types/mixpanel-tracker.d.ts',
       getContents: expect.any(Function),
     })
-    expect(contents).toContain("import type { MixpanelTracker } from '@mixchunk/mixpanel-tracker'")
     expect(contents).toContain(
       "import type { NuxtMixpanelTrackerModuleOptions } from '@mixchunk/mixpanel-tracker/nuxt'",
     )
-    expect(contents).toContain("declare module '#app'")
-    expect(contents).toContain("declare module '#app/nuxt'")
-    expect(contents).toContain("declare module 'nuxt/app'")
     expect(contents).toContain("declare module 'nuxt/schema'")
-    expect(contents).toContain("declare module 'vue'")
+    expect(contents).toContain('interface NuxtConfig')
+    expect(contents).toContain('interface NuxtOptions')
+    expect(contents).toContain('interface PublicRuntimeConfig')
     expect(contents).toContain('mixpanelTracker?: NuxtMixpanelTrackerModuleOptions')
-    expect(contents).toContain('$mixpanel: MixpanelTracker')
+    expect(contents).not.toContain('$mixpanel: MixpanelTracker')
   })
 
   it('keeps createNuxtMixpanelTracker as a manual helper', () => {
