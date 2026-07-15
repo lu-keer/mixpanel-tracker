@@ -1,5 +1,11 @@
 # @mixchunk/mixpanel-tracker
 
+## 0.1.5
+
+### Patch Changes
+
+- d91465e: Add a shared event registry for strict event names and properties across the core, Vue, and Nuxt integrations. Remove the permissive typed `track` overload while keeping unregistered trackers flexible.
+
 ## 0.1.4
 
 ### Patch Changes
