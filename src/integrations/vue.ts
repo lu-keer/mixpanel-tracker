@@ -1,7 +1,12 @@
 import type { App, InjectionKey, Plugin } from 'vue'
 import { inject } from 'vue'
 import type { RouteLocationNormalizedLoaded, Router } from 'vue-router'
-import type { EventProperties, MixpanelTracker } from '../core/types'
+import type {
+  EventProperties,
+  MixpanelTracker,
+  RegisteredMixpanelEventMap,
+  ValidEventMap,
+} from '../core/types'
 
 export const mixpanelTrackerKey: InjectionKey<MixpanelTracker> = Symbol('mixpanel-tracker')
 
@@ -20,7 +25,7 @@ declare module 'vue' {
 }
 
 export function createVueMixpanel<
-  EventMap extends Record<string, EventProperties> = Record<string, EventProperties>,
+  EventMap extends ValidEventMap<EventMap> = RegisteredMixpanelEventMap,
 >(tracker: MixpanelTracker<EventMap>): Plugin {
   return {
     install(app: App) {
@@ -31,7 +36,7 @@ export function createVueMixpanel<
 }
 
 export function useMixpanel<
-  EventMap extends Record<string, EventProperties> = Record<string, EventProperties>,
+  EventMap extends ValidEventMap<EventMap> = RegisteredMixpanelEventMap,
 >(): MixpanelTracker<EventMap> {
   const tracker = inject(mixpanelTrackerKey)
 
@@ -43,13 +48,16 @@ export function useMixpanel<
 }
 
 export function setupVueRouterTracking<
-  EventMap extends Record<string, EventProperties> = Record<string, EventProperties>,
+  EventMap extends ValidEventMap<EventMap> = RegisteredMixpanelEventMap,
 >(
   router: Router,
   tracker: MixpanelTracker<EventMap>,
   options: VueRouterTrackingOptions = {},
 ): () => void {
   const eventName = options.eventName ?? 'Page Viewed'
+  const runtimeTracker = tracker as unknown as MixpanelTracker<
+    Record<string, EventProperties>
+  >
 
   return router.afterEach((to, from) => {
     const properties = options.getProperties
@@ -64,6 +72,6 @@ export function setupVueRouterTracking<
       return
     }
 
-    tracker.track(eventName, properties)
+    runtimeTracker.track(eventName, properties)
   })
 }

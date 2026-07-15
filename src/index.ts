@@ -4,6 +4,7 @@ export type {
   EventName,
   EventProperties,
   EventPropertyValue,
+  MixpanelEventRegistry,
   MixpanelTracker,
   MixpanelTrackerOptions,
 } from './core/types'

@@ -1,6 +1,6 @@
 # Vue Example
 
-This example demonstrates the browser SDK, Vue plugin, `useMixpanel`, runtime common properties, and Vue Router page-view tracking.
+This example demonstrates the browser SDK, a shared event registry, the Vue plugin, `useMixpanel`, runtime common properties, and Vue Router page-view tracking.
 
 ## Setup
 

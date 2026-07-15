@@ -1,7 +1,13 @@
 import mixpanel from 'mixpanel-browser'
 import type { Config } from 'mixpanel-browser'
 import { mergeProperties, removeUndefinedProperties } from './properties'
-import type { EventProperties, MixpanelTracker, MixpanelTrackerOptions } from './types'
+import type {
+  EventProperties,
+  MixpanelTracker,
+  MixpanelTrackerOptions,
+  RegisteredMixpanelEventMap,
+  ValidEventMap,
+} from './types'
 
 function isBrowserEnvironment(): boolean {
   return typeof window !== 'undefined' && typeof document !== 'undefined'
@@ -28,7 +34,7 @@ function createMixpanelConfig(options: MixpanelTrackerOptions): Partial<Config> 
 }
 
 export function createTracker<
-  EventMap extends Record<string, EventProperties> = Record<string, EventProperties>,
+  EventMap extends ValidEventMap<EventMap> = RegisteredMixpanelEventMap,
 >(options: MixpanelTrackerOptions): MixpanelTracker<EventMap> {
   const runtimeCommonProperties: EventProperties = {}
   const browser = isBrowserEnvironment()
@@ -64,7 +70,7 @@ export function createTracker<
 
   const canUseMixpanel = () => enabled && browser && initialized
 
-  const tracker: MixpanelTracker<EventMap> = {
+  const tracker: MixpanelTracker<Record<string, EventProperties>> = {
     track(eventName: string, properties: EventProperties = {}) {
       if (!canUseMixpanel()) {
         return
@@ -159,5 +165,5 @@ export function createTracker<
     },
   }
 
-  return tracker
+  return tracker as MixpanelTracker<EventMap>
 }

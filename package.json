@@ -38,7 +38,7 @@
   "scripts": {
     "dev": "tsup --watch",
     "build": "tsup",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc -p type-tests/loose && tsc -p type-tests/registered",
     "test": "vitest run",
     "lint": "eslint .",
     "changeset": "changeset",

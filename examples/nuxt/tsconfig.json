@@ -11,5 +11,9 @@
     "skipLibCheck": true,
     "types": ["node"]
   },
-  "include": ["nuxt.config.ts"]
+  "include": [
+    "nuxt.config.ts",
+    "analytics/**/*.ts",
+    "types/**/*.d.ts"
+  ]
 }

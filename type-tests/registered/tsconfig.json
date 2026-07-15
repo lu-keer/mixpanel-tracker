@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "@mixchunk/mixpanel-tracker": ["../../src/index.ts"],
+      "@mixchunk/mixpanel-tracker/vue": ["../../src/integrations/vue.ts"]
+    }
+  },
+  "include": ["./index.ts"]
+}

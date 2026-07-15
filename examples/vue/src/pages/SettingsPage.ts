@@ -1,11 +1,10 @@
 import { defineComponent, h } from 'vue'
 import { useMixpanel } from '@mixchunk/mixpanel-tracker/vue'
-import type { ExampleEventMap } from '../analytics'
 
 export default defineComponent({
   name: 'SettingsPage',
   setup() {
-    const mixpanel = useMixpanel<ExampleEventMap>()
+    const mixpanel = useMixpanel()
 
     return () =>
       h('section', { class: 'panel' }, [

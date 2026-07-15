@@ -156,7 +156,7 @@ export default defineNuxtConfig({
 })
 ```
 
-该模块会注册 client-only typed plugin，并向 Nuxt app context 注入 `$mixpanel`。执行 `nuxi prepare` 后，编辑器应能为 `$mixpanel.track`、`identify`、`setUserProperties`、`reset` 等方法提供类型提示。
+该模块会注册 client-only typed plugin，并向 Nuxt app context 注入 `$mixpanel`。注册下文的 `MixpanelEventRegistry` 并执行 `nuxi prepare` 后，`$mixpanel.track` 会获得业务事件名和属性提示；`identify`、`setUserProperties`、`reset` 等方法也会保留完整类型。
 
 ### 在 Nuxt 中上报事件
 
@@ -194,13 +194,12 @@ export default defineNuxtConfig({
 ```ts
 // plugins/mixpanel.client.ts
 import { createTracker } from '@mixchunk/mixpanel-tracker'
-import type { MixpanelTracker } from '@mixchunk/mixpanel-tracker'
 
 export default defineNuxtPlugin((nuxtApp) => {
   const config = useRuntimeConfig()
   const route = useRoute()
 
-  const tracker: MixpanelTracker = createTracker({
+  const tracker = createTracker({
     token: config.public.mixpanelToken,
     enabled: Boolean(config.public.mixpanelToken),
     getCommonProperties: () => ({
@@ -261,12 +260,24 @@ tracker.track('Page Viewed', {
 
 ## TypeScript 事件类型
 
-业务项目可以声明事件映射，让事件名和属性获得类型提示：
+未注册业务事件类型时，tracker 保持宽泛模式，允许任意事件名并可省略属性：
 
 ```ts
 import { createTracker } from '@mixchunk/mixpanel-tracker'
 
-type AppEventMap = {
+const tracker = createTracker({ token })
+
+tracker.track('Page Viewed')
+tracker.track('Custom Event', { source: 'web' })
+```
+
+需要严格校验的业务项目，推荐集中定义事件映射并注册一次。核心 Tracker、Vue Plugin、`useMixpanel()` 和 Nuxt `$mixpanel` 会自动复用同一类型。
+
+### 定义事件映射
+
+```ts
+// analytics/events.ts
+export type MixpanelEventMap = {
   'Project Created': {
     project_id: string
     source: 'blank' | 'template'
@@ -276,8 +287,37 @@ type AppEventMap = {
     source: 'settings' | 'project'
   }
 }
+```
 
-export const tracker = createTracker<AppEventMap>({
+严格模式下每个事件都需要传属性对象；没有属性的事件可定义为 `{}`。
+
+### 注册事件映射
+
+```ts
+// types/mixpanel-tracker.d.ts
+import type {
+  MixpanelEventMap as AppMixpanelEventMap,
+} from '@/analytics/events'
+
+declare module '@mixchunk/mixpanel-tracker' {
+  interface MixpanelEventRegistry {
+    events: AppMixpanelEventMap
+  }
+}
+
+export {}
+```
+
+确保该声明文件包含在项目的 TypeScript 配置中。Nuxt 项目执行 `nuxi prepare`，必要时重启 TypeScript Server。
+
+### 使用注册类型
+
+注册后无需在各入口重复传递泛型：
+
+```ts
+import { createTracker } from '@mixchunk/mixpanel-tracker'
+
+export const tracker = createTracker({
   token: import.meta.env.VITE_MIXPANEL_TOKEN,
 })
 
@@ -287,13 +327,38 @@ tracker.track('Project Created', {
 })
 ```
 
-Vue 组件中也可以复用同一份事件类型：
+Vue Composition API：
 
 ```ts
 import { useMixpanel } from '@mixchunk/mixpanel-tracker/vue'
-import type { AppEventMap } from '@/analytics/events'
 
-const mixpanel = useMixpanel<AppEventMap>()
+const mixpanel = useMixpanel()
+
+mixpanel.track('Invite Sent', {
+  invitee_role: 'member',
+  source: 'project',
+})
+```
+
+Nuxt：
+
+```ts
+const { $mixpanel } = useNuxtApp()
+
+$mixpanel.track('Project Created', {
+  project_id: 'p_001',
+  source: 'blank',
+})
+```
+
+注册后，未知事件、缺少属性或错误属性值都会在编译期报错。
+
+### 局部事件映射
+
+仅在同一项目需要多个相互独立的 tracker 时，才建议显式传递泛型：
+
+```ts
+const isolatedTracker = createTracker<AnotherEventMap>({ token })
 ```
 
 ## 公共属性
@@ -408,7 +473,7 @@ const tracker = createTracker({
 
 | 方法                                     | 说明                                      |
 | -------------------------------------- | --------------------------------------- |
-| `track(eventName, properties?)`        | 上报事件                                    |
+| `track(eventName, properties?)`        | 上报事件；注册事件映射后属性必填并按事件校验                   |
 | `identify(userId)`                     | 绑定 Mixpanel distinct id                 |
 | `setUserProperties(properties)`        | 设置用户属性                                  |
 | `registerCommonProperties(properties)` | 注册运行时公共属性                               |
